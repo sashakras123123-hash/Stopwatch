@@ -2,13 +2,17 @@ package com.example.stopwatch
 
 import android.os.Bundle
 import android.os.SystemClock
+import android.view.animation.Animation
+import android.view.animation.RotateAnimation
 import android.widget.Button
 import android.widget.Chronometer
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var stopwatch: Chronometer
+    lateinit var imageView: ImageView
     var running = false
     var offset: Long = 0
 
@@ -20,7 +24,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        stopwatch = findViewById<Chronometer>(R.id.stopwatch)
+        stopwatch = findViewById(R.id.stopwatch)
+        imageView = findViewById<ImageView>(R.id.imageView2)
+        imageView.setImageResource(R.drawable.f9ccb485192f444c9bf840360cef6)// Ищем картинку по ID
 
         if (savedInstanceState != null) {
             offset = savedInstanceState.getLong(OFFSET_KEY)
@@ -28,6 +34,7 @@ class MainActivity : AppCompatActivity() {
             if (running) {
                 stopwatch.base = savedInstanceState.getLong(BASE_KEY)
                 stopwatch.start()
+                startRotation()
             } else setBaseTime()
         }
 
@@ -36,6 +43,7 @@ class MainActivity : AppCompatActivity() {
             if (!running) {
                 setBaseTime()
                 stopwatch.start()
+                startRotation()
                 running = true
             }
         }
@@ -45,6 +53,7 @@ class MainActivity : AppCompatActivity() {
             if (running) {
                 saveOffset()
                 stopwatch.stop()
+                stopRotation()
                 running = false
             }
         }
@@ -56,23 +65,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //    override fun onStop() {
-//        super.onStop()
     override fun onPause() {
         super.onPause()
         if (running) {
             saveOffset()
             stopwatch.stop()
+            stopRotation()
         }
     }
 
-    //    override fun onRestart() {
-//        super.onRestart()
     override fun onResume() {
         super.onResume()
         if (running) {
             setBaseTime()
             stopwatch.start()
+            startRotation()
             offset = 0
         }
     }
@@ -90,5 +97,20 @@ class MainActivity : AppCompatActivity() {
 
     fun saveOffset() {
         offset = SystemClock.elapsedRealtime() - stopwatch.base
+    }
+
+    private fun startRotation() {
+        val rotate = RotateAnimation(
+            0f, 360f,
+            Animation.RELATIVE_TO_SELF, 0.5f,
+            Animation.RELATIVE_TO_SELF, 0.5f
+        )
+        rotate.duration = 1000 // Время одного полного оборота
+        rotate.repeatCount = Animation.INFINITE // Бесконечное повторение
+        imageView.startAnimation(rotate)
+    }
+
+    private fun stopRotation() {
+        imageView.clearAnimation()
     }
 }
